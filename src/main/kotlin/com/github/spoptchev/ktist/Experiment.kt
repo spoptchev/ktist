@@ -10,24 +10,7 @@ sealed class Outcome<out T>
 data class Success<out T>(val value: T) : Outcome<T>()
 data class Failure<out T>(val exception: Exception) : Outcome<T>()
 
-interface Behaviour<out T> : () -> T
-
-sealed class Trial<out T> {
-    abstract val name: String
-    abstract val behaviour: Behaviour<T>
-
-    fun observe(clock: Clock = NanoClock()): Observation<T> {
-        val start = Instant.now(clock)
-        val outcome = try { Success(behaviour()) } catch (e: Exception) { Failure<T>(e) }
-        val stop = Instant.now(clock)
-
-        return Observation(name, outcome, start, stop)
-    }
-
-}
-
-data class Control<out T>(override val name: String = "control", override val behaviour: Behaviour<T>) : Trial<T>()
-data class Candidate<out T>(override val name: String = "candidate", override val behaviour: Behaviour<T>) : Trial<T>()
+typealias Behaviour<T> = () -> T
 
 data class Observation<out T>(
         val name: String,
@@ -49,10 +32,22 @@ data class Observation<out T>(
 
 }
 
+data class Trial<out T>(val name: String, private val behaviour: Behaviour<T>) {
+
+    fun run(clock: Clock = NanoClock()): Observation<T> {
+        val start = Instant.now(clock)
+        val outcome = try { Success(behaviour()) } catch (e: Exception) { Failure<T>(e) }
+        val stop = Instant.now(clock)
+
+        return Observation(name, outcome, start, stop)
+    }
+
+}
+
 data class Experiment<out T>(
         val name: String,
-        private val control: Control<T>,
-        private val candidates: Set<Candidate<T>>
+        private val control: Trial<T>,
+        private val candidates: Set<Trial<T>>
 ) {
 
     private val shuffledTrials: List<Trial<T>> by lazy {
@@ -61,7 +56,7 @@ data class Experiment<out T>(
 
     fun conduct(): T {
         val observationByTrail = shuffledTrials
-                .map { Pair(it, it.observe()) }
+                .map { Pair(it, it.run()) }
                 .toMap()
 
         return observationByTrail[control]!!.result
