@@ -6,16 +6,16 @@ import kotlin.test.assertTrue
 
 class ExperimentTest {
 
-    private val controlTrail = Trial(name = "control-trail") { true }
-    private val candidateTrail = Trial(name = "candidate-trail") { false }
+    private val controlTrial = Trial(name = "control-trial") { true }
+    private val candidateTrial = Trial(name = "candidate-trial") { false }
     private val contextProvider = object : ContextProvider<Unit> {
         override fun invoke() = Unit
     }
 
     private val baseExperiment = DefaultExperiment<Boolean, Unit>(
             name = "test",
-            control = controlTrail,
-            candidates = listOf(candidateTrail)
+            control = controlTrial,
+            candidates = listOf(candidateTrial)
     )
 
     @Test

@@ -7,7 +7,7 @@ data class Scientist<T, out C>(
         private val contextProvider: ContextProvider<C>,
         private val publish: Publisher<T, C> = NullPublisher(),
         private val ignores: List<Ignore<T>> = emptyList(),
-        private val comparator: Comparator<T> = { a, b -> a == b }
+        private val comparator: Comparator<T> = { candidate, control -> candidate == control }
 ) {
 
     fun evaluate(experiment: Experiment<T, C>): T {
@@ -19,7 +19,7 @@ data class Scientist<T, out C>(
                 val (experimentName, observations, controlObservation, candidateObservations) = experimentState
 
                 val allMismatches = candidateObservations.filterNot { it.matches(controlObservation, comparator) }
-                val ignoredMismatches = allMismatches.filterNot { it.isIgnored(controlObservation, ignores) }
+                val ignoredMismatches = allMismatches.filter { it.isIgnored(controlObservation, ignores) }
                 val mismatches = allMismatches - ignoredMismatches
 
                 val result = Result(
