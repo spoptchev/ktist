@@ -1,47 +1,51 @@
 package com.github.spoptchev.ktist
 
-data class Scientist<T>(
-        private val publish: Publisher<T> = NullPublisher(),
-        private val context: Context = emptyMap(),
+data class Scientist<T, out C>(
+        private val contextProvider: ContextProvider<C>,
+        private val publish: Publisher<T, C> = NullPublisher(),
         private val ignores: List<Ignore<T>> = emptyList(),
         private val comparator: Comparator<T> = { a, b -> a == b }
 ) {
 
-    fun evaluate(experiment: OpenExperiment<T>): T {
-        val conductedExperiment = experiment.conduct()
-        val (experimentName, observations, controlObservation, candidateObservations) = conductedExperiment
+    fun evaluate(experiment: Experiment<T, C>): T {
+        val experimentState = experiment.conduct(contextProvider)
 
-        val allMismatches = candidateObservations
-                .filterNot { it.matches(controlObservation, comparator) }
-        val ignoredMismatches = allMismatches
-                .filterNot { it.isIgnored(controlObservation, ignores) }
-        val mismatches = allMismatches - ignoredMismatches
+        return when(experimentState) {
+            is Skipped<T> -> experimentState.observation.result
+            is Conducted<T> -> {
+                val (experimentName, observations, controlObservation, candidateObservations) = experimentState
 
-        val result = Result(
-                experimentName = experimentName,
-                observations = observations,
-                controlObservation = controlObservation,
-                candidateObservations = candidateObservations,
-                mismatches = mismatches,
-                ignoredMismatches = ignoredMismatches,
-                context = context
-        )
+                val allMismatches = candidateObservations.filterNot { it.matches(controlObservation, comparator) }
+                val ignoredMismatches = allMismatches.filterNot { it.isIgnored(controlObservation, ignores) }
+                val mismatches = allMismatches - ignoredMismatches
 
-        publish(result)
+                val result = Result(
+                        experimentName = experimentName,
+                        observations = observations,
+                        controlObservation = controlObservation,
+                        candidateObservations = candidateObservations,
+                        mismatches = mismatches,
+                        ignoredMismatches = ignoredMismatches,
+                        contextProvider = contextProvider
+                )
 
-        return controlObservation.result
+                publish(result)
+
+                controlObservation.result
+            }
+        }
     }
 
 }
 
-data class Result<T>(
+data class Result<T, out C>(
         val experimentName: String,
         val observations: List<Observation<T>>,
         val controlObservation: Observation<T>,
         val candidateObservations: List<Observation<T>>,
         val mismatches: List<Observation<T>>,
         val ignoredMismatches: List<Observation<T>>,
-        val context: Context
+        val contextProvider: ContextProvider<C>
 ) {
 
     val matched: Boolean by lazy { !mismatched && !ignored }
@@ -50,11 +54,10 @@ data class Result<T>(
 
 }
 
-interface Publisher<T> : (Result<T>) -> Unit
+interface Publisher<T, in C> : (Result<T, C>) -> Unit
 
-class NullPublisher<T> : Publisher<T> {
-    override fun invoke(result: Result<T>) {}
+class NullPublisher<T, in C> : Publisher<T, C> {
+    override fun invoke(result: Result<T, C>) {}
 }
 
-typealias Context = Map<String, Any>
-
+interface ContextProvider<out C> : () -> C
