@@ -26,7 +26,7 @@ class ObservationTest {
     )
 
     class IgnoreCandidateFailures : Matcher<Int> {
-        override fun match(candidate: Outcome<Int>, control: Outcome<Int>) = candidate.isFailure()
+        override fun invoke(candidate: Outcome<Int>, control: Outcome<Int>) = candidate.isFailure()
     }
 
     @Test

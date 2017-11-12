@@ -30,7 +30,7 @@ class ScientistTest {
     )
 
     class IgnoreCandidateFailures : Matcher<Boolean> {
-        override fun match(candidate: Outcome<Boolean>, control: Outcome<Boolean>) = candidate.isFailure()
+        override fun invoke(candidate: Outcome<Boolean>, control: Outcome<Boolean>) = candidate.isFailure()
     }
 
     private val ignore = IgnoreCandidateFailures()

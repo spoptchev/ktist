@@ -22,8 +22,8 @@ data class Observation<T>(
         }
     }
 
-    fun matches(other: Observation<T>, matcher: Matcher<T>) = matcher.match(outcome, other.outcome)
+    fun matches(other: Observation<T>, match: Matcher<T>) = match(outcome, other.outcome)
 
-    fun isIgnored(other: Observation<T>, ignores: List<Matcher<T>>) = ignores.any { it.match(outcome, other.outcome) }
+    fun isIgnored(other: Observation<T>, ignores: List<Matcher<T>>) = ignores.any { it(outcome, other.outcome) }
 
 }
