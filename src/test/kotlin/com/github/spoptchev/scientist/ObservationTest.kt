@@ -6,6 +6,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 
 class ObservationTest {
@@ -43,6 +44,8 @@ class ObservationTest {
         val observation = baseObservation.copy(outcome = Failure(RuntimeException()))
 
         observation.result
+
+        fail("expected RuntimeException")
     }
 
 }
