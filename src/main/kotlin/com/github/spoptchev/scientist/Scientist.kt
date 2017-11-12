@@ -1,8 +1,5 @@
 package com.github.spoptchev.scientist
 
-typealias Comparator<T> = (Outcome<T>, Outcome<T>) -> Boolean
-typealias Ignore<T> = (Outcome<T>, Outcome<T>) -> Boolean
-
 data class Scientist<T, out C>(
         private val contextProvider: ContextProvider<C>,
         private val publish: Publisher<T, C> = NullPublisher(),
