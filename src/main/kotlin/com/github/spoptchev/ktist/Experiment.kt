@@ -80,36 +80,44 @@ data class Observation<T>(
 
 }
 
-sealed class Experiment<T> {
-    abstract val name: String
-}
-
-data class OpenExperiment<T>(
-        override val name: String,
-        private val control: OpenTrial<T>,
-        private val candidates: List<OpenTrial<T>>
-) : Experiment<T>() {
+data class Experiment<T, in C>(
+        val name: String,
+        val control: OpenTrial<T>,
+        val candidates: List<OpenTrial<T>>,
+        val enabledIf: (ContextProvider<C>) -> Boolean = { true },
+        val runIf: (ContextProvider<C>) -> Boolean = { true }
+) {
 
     private val shuffledTrials: List<OpenTrial<T>> by lazy {
         (listOf(control) + candidates).sortedBy { it.id }
     }
 
-    fun conduct(): ConductedExperiment<T> {
-        val observations = shuffledTrials.map { it.run() }
-        val controlObservation = observations.first { it == control }
-        val candidateObservations = observations - controlObservation
+    fun conduct(context: ContextProvider<C>): ExperimentState<T> {
+        return if (conductExperiment(context)) {
+            val observations = shuffledTrials.map { it.run() }
+            val controlObservation = observations.first { it == control }
+            val candidateObservations = observations - controlObservation
 
-        return ConductedExperiment(name, observations, controlObservation, candidateObservations)
+            Conducted(name, observations, controlObservation, candidateObservations)
+        } else {
+            Skipped(control.run())
+        }
     }
+
+    private fun conductExperiment(context: ContextProvider<C>) = enabledIf(context) && runIf(context)
 
 }
 
-data class ConductedExperiment<T>(
-        override val name: String,
+sealed class ExperimentState<T>
+
+data class Skipped<T>(val observation: Observation<T>) : ExperimentState<T>()
+
+data class Conducted<T>(
+        val name: String,
         val observations: List<Observation<T>>,
         val controlObservation: Observation<T>,
         val candidateObservations: List<Observation<T>>
-) : Experiment<T>()
+) : ExperimentState<T>()
 
 
 private class NanoClock(val clock: Clock = Clock.systemUTC()) : Clock() {
