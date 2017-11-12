@@ -1,19 +1,22 @@
 package com.github.spoptchev.scientist
 
-open class Experiment<T, in C>(
+interface Experiment<T, in C> {
+    fun conduct(contextProvider: ContextProvider<C>): ExperimentState<T>
+}
+
+data class DefaultExperiment<T, in C>(
         val name: String,
         val control: OpenTrial<T>,
         val candidates: List<OpenTrial<T>>,
-        val enabledIf: (ContextProvider<C>) -> Boolean = { true },
-        val runIf: (ContextProvider<C>) -> Boolean = { true }
-) {
+        val conductable: (ContextProvider<C>) -> Boolean = { true }
+) : Experiment<T, C> {
 
     private val shuffledTrials: List<OpenTrial<T>> by lazy {
         (listOf(control) + candidates).sortedBy { it.id }
     }
 
-    fun conduct(context: ContextProvider<C>): ExperimentState<T> {
-        return if (conductExperiment(context)) {
+    override fun conduct(contextProvider: ContextProvider<C>): ExperimentState<T> {
+        return if (conductable(contextProvider)) {
             val observations = shuffledTrials.map { it.run() }
             val controlObservation = observations.first { it == control }
             val candidateObservations = observations - controlObservation
@@ -23,7 +26,5 @@ open class Experiment<T, in C>(
             Skipped(control.run())
         }
     }
-
-    protected fun conductExperiment(context: ContextProvider<C>) = enabledIf(context) && runIf(context)
 
 }
