@@ -1,4 +1,4 @@
-package com.github.spoptchev.ktist
+package com.github.spoptchev.scientist
 
 typealias Comparator<T> = (Outcome<T>, Outcome<T>) -> Boolean
 typealias Ignore<T> = (Outcome<T>, Outcome<T>) -> Boolean

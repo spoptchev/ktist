@@ -1,4 +1,4 @@
-package com.github.spoptchev.ktist
+package com.github.spoptchev.scientist
 
 interface Publisher<T, in C> : (Result<T, C>) -> Unit
 

@@ -1,4 +1,4 @@
-package com.github.spoptchev.ktist
+package com.github.spoptchev.scientist
 
 import org.junit.Test
 import java.time.Clock
