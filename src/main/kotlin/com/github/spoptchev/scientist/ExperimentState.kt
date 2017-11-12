@@ -1,4 +1,4 @@
-package com.github.spoptchev.ktist
+package com.github.spoptchev.scientist
 
 sealed class ExperimentState<T>
 data class Skipped<T>(val observation: Observation<T>) : ExperimentState<T>()
