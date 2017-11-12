@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 
 class TrialTest {
 
-    private val trial = Trial("test") {
+    private val trial = OpenTrial("test", "test") {
         Thread.sleep(20)
         true
     }
