@@ -6,6 +6,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 
@@ -23,6 +24,10 @@ class ObservationTest {
             startedAt = startedAt,
             stoppedAt = startedAt
     )
+
+    class IgnoreCandidateFailures : Matcher<Int> {
+        override fun match(candidate: Outcome<Int>, control: Outcome<Int>) = candidate.isFailure()
+    }
 
     @Test
     fun `test duration`() {
@@ -46,6 +51,24 @@ class ObservationTest {
         observation.result
 
         fail("expected RuntimeException")
+    }
+
+    @Test
+    fun `test match`() {
+        val observation1 = baseObservation.copy(outcome = Success(1))
+        val observation2 = baseObservation.copy(outcome = Success(1))
+
+        assertTrue(observation1.matches(observation2, DefaultMatcher()))
+    }
+
+    @Test
+    fun `test isIgnored`() {
+        val matcher = IgnoreCandidateFailures()
+
+        val observation1 = baseObservation.copy(outcome = Success(1))
+        val observation2 = baseObservation.copy(outcome = Failure(RuntimeException("test")))
+
+        assertTrue(observation2.isIgnored(observation1, listOf(matcher)))
     }
 
 }

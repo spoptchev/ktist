@@ -29,7 +29,11 @@ class ScientistTest {
             candidates = listOf(candidateTrial, exceptionTrial)
     )
 
-    private val ignore: Ignore<Boolean> = { candidate, _ -> candidate is Failure }
+    class IgnoreCandidateFailures : Matcher<Boolean> {
+        override fun match(candidate: Outcome<Boolean>, control: Outcome<Boolean>) = candidate.isFailure()
+    }
+
+    private val ignore = IgnoreCandidateFailures()
 
     private val scientist = Scientist(
             contextProvider = contextProvider,
