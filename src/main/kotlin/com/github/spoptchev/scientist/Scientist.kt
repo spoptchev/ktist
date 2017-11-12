@@ -11,8 +11,8 @@ data class Scientist<T, out C>(
         val experimentState = experiment.conduct(contextProvider)
 
         return when(experimentState) {
-            is Skipped<T> -> experimentState.observation.result
-            is Conducted<T> -> {
+            is Skipped -> experimentState.observation.result
+            is Conducted -> {
                 val (experimentName, observations, controlObservation, candidateObservations) = experimentState
 
                 val allMismatches = candidateObservations.filterNot { it.matches(controlObservation, matcher) }
