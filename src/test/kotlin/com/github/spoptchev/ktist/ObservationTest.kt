@@ -16,6 +16,7 @@ class ObservationTest {
     private val startedAt = Instant.now(fixedClock)
 
     private val baseObservation = Observation(
+            id = "test",
             name = "test",
             outcome = outcome,
             startedAt = startedAt,
