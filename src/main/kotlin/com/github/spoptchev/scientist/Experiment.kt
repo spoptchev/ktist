@@ -6,19 +6,19 @@ interface Experiment<T, in C> {
 
 data class DefaultExperiment<T, in C>(
         val name: String,
-        val control: OpenTrial<T>,
-        val candidates: List<OpenTrial<T>>,
-        val conductable: (ContextProvider<C>) -> Boolean = { true }
+        val control: Trial<T>,
+        val candidates: List<Trial<T>>,
+        val conductible: (ContextProvider<C>) -> Boolean = { true }
 ) : Experiment<T, C> {
 
-    private val shuffledTrials: List<OpenTrial<T>> by lazy {
+    private val shuffledTrials: List<Trial<T>> by lazy {
         (listOf(control) + candidates).sortedBy { it.id }
     }
 
     override fun conduct(contextProvider: ContextProvider<C>): ExperimentState<T> {
-        return if (conductable(contextProvider)) {
+        return if (conductible(contextProvider)) {
             val observations = shuffledTrials.map { it.run() }
-            val controlObservation = observations.first { it == control }
+            val controlObservation = observations.first { it.id == control.id }
             val candidateObservations = observations - controlObservation
 
             Conducted(name, observations, controlObservation, candidateObservations)
