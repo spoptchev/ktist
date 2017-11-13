@@ -1,7 +1,7 @@
 package com.github.spoptchev.scientist
 
 
-interface Matcher<in T> : (Outcome<T>, Outcome<T>) -> Boolean
+typealias Matcher<T> = (Outcome<T>, Outcome<T>) -> Boolean
 
 class DefaultMatcher<in T> : Matcher<T> {
     override fun invoke(candidate: Outcome<T>, control: Outcome<T>): Boolean = when(candidate) {
