@@ -1,10 +1,10 @@
 package com.github.spoptchev.scientist
 
-data class Scientist<T, out C>(
-        private val contextProvider: ContextProvider<C>,
-        private val publish: Publisher<T, C> = NullPublisher(),
-        private val ignores: List<Matcher<T>> = emptyList(),
-        private val matcher: Matcher<T> = DefaultMatcher()
+data class Scientist<T, C>(
+        val contextProvider: ContextProvider<C>,
+        val publish: Publisher<T, C> = NullPublisher(),
+        val ignores: List<Matcher<T>> = emptyList(),
+        val matcher: Matcher<T> = DefaultMatcher()
 ) {
 
     fun evaluate(experiment: Experiment<T, C>): T {
