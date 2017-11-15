@@ -2,57 +2,50 @@ package com.github.spoptchev.scientist
 
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 
 class ScientistSetupTest {
 
-    private val setup = ScientistSetup<Int, Unit>(
-            contextProvider = NoContextProvider,
-            publish = NullPublisher(),
-            ignores = emptyList(),
-            matcher = DefaultMatcher()
-    )
+    private val setup = ScientistSetup<Int, Unit>()
+            .context {}
 
     @Test
     fun `test change publisher`() {
         val publisher = { _ : Result<Int, Unit> -> }
-        val newSetup = setup.publisher(publisher)
+        val scientist = setup
+                .publisher(publisher)
+                .complete()
 
-        val oldScientist = setup.complete()
-        val newScientist = newSetup.complete()
-
-        assertNotEquals(publisher, oldScientist.publish)
-        assertEquals(publisher, newScientist.publish)
+        assertEquals(publisher, scientist.publish)
     }
 
     @Test
     fun `test add ignore`() {
         val ignore = { _: Outcome<Int>, _: Outcome<Int> -> false }
-        val newSetup = setup.ignore(ignore)
+        val scientist = setup
+                .ignore(ignore)
+                .ignore({ _: Outcome<Int>, _: Outcome<Int> -> true })
+                .complete()
 
-        val oldScientist = setup.complete()
-        val newScientist = newSetup.complete()
-
-        assertNotEquals(ignore, oldScientist.ignores.firstOrNull())
-        assertEquals(ignore, newScientist.ignores.first())
+        assertEquals(ignore, scientist.ignores.first())
+        assertEquals(2, scientist.ignores.size)
     }
 
     @Test
     fun `test change matcher`() {
         val matcher = { _: Outcome<Int>, _: Outcome<Int> -> false }
-        val newSetup = setup.match(matcher)
+        val scientist = setup
+                .match(matcher)
+                .complete()
 
-        val oldScientist = setup.complete()
-        val newScientist = newSetup.complete()
-
-        assertNotEquals(matcher, oldScientist.matcher)
-        assertEquals(matcher, newScientist.matcher)
+        assertEquals(matcher, scientist.matcher)
     }
 
     @Test
     fun `test context provider`() {
-        val scientist = setup.complete()
+        val scientist = setup
+                .context(NoContextProvider)
+                .complete()
 
         assertEquals(NoContextProvider, scientist.contextProvider)
     }

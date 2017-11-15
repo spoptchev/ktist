@@ -7,11 +7,11 @@ import kotlin.test.assertTrue
 
 class MatcherTest {
 
-    val success1 = Success(true)
-    val success2 = Success(false)
-    val failure1 = Failure<Boolean>(RuntimeException("failure1"))
-    val failure2 = Failure<Boolean>(RuntimeException("failure2"))
-    val match = DefaultMatcher<Boolean>()
+    private val success1 = Success(true)
+    private val success2 = Success(false)
+    private val failure1 = Failure<Boolean>(RuntimeException("failure1"))
+    private val failure2 = Failure<Boolean>(RuntimeException("failure2"))
+    private val match = DefaultMatcher<Boolean>()
 
     @Test
     fun `test when both success and same value`() {

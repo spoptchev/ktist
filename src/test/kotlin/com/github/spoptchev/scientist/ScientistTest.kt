@@ -15,9 +15,7 @@ class ScientistTest {
     }
 
     private val publisher = CatchingPublisher(null)
-    private val contextProvider = object : ContextProvider<Unit> {
-        override fun invoke() = Unit
-    }
+    private val contextProvider = NoContextProvider
     private val exception = RuntimeException("Test")
     private val controlTrial = Trial(name = "control-trial") { true }
     private val candidateTrial = Trial(name = "candidate-trial") { false }
@@ -29,11 +27,7 @@ class ScientistTest {
             candidates = listOf(candidateTrial, exceptionTrial)
     )
 
-    class IgnoreCandidateFailures : Matcher<Boolean> {
-        override fun invoke(candidate: Outcome<Boolean>, control: Outcome<Boolean>) = candidate.isFailure()
-    }
-
-    private val ignore = IgnoreCandidateFailures()
+    private val ignore = { candidate: Outcome<Boolean>, _: Outcome<Boolean> -> candidate.isFailure() }
 
     private val scientist = Scientist(
             contextProvider = contextProvider,

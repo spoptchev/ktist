@@ -2,13 +2,13 @@ package com.github.spoptchev.scientist
 
 data class Scientist<T, C>(
         val contextProvider: ContextProvider<C>,
-        val publish: Publisher<T, C> = NullPublisher(),
+        val publish: Publisher<T, C> = NoPublisher(),
         val ignores: List<Matcher<T>> = emptyList(),
         val matcher: Matcher<T> = DefaultMatcher()
 ) {
 
     fun evaluate(experiment: Experiment<T, C>): T {
-        val experimentState = experiment.conduct(contextProvider)
+        val experimentState = experiment.conduct(contextProvider())
 
         return when(experimentState) {
             is Skipped -> experimentState.observation.result

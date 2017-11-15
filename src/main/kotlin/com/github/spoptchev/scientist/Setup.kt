@@ -1,71 +1,67 @@
-@file:JvmName("ExperimentsSetup")
 package com.github.spoptchev.scientist
 
-data class ExperimentSetup<T, C>(
-        private val name: String,
-        private val control: Trial<T>? = null,
-        private val candidates: List<Trial<T>> = emptyList(),
-        private val conductible: (ContextProvider<C>) -> Boolean = { true }
-) {
+import kotlin.properties.Delegates
 
-    fun control(name: String = "control", behaviour: Behaviour<T>) =
-            copy(control = Trial(name = name, behaviour = behaviour))
+class ExperimentSetup<T, C> {
 
-    fun candidate(name: String = "candidate", behaviour: Behaviour<T>) =
-            copy(candidates = candidates + Trial(name = name, behaviour = behaviour))
+    private var name: String = "default-experiment"
+    private var control: Trial<T> by Delegates.notNull()
+    private var candidates: List<Trial<T>> = mutableListOf()
+    private var conductible: (C) -> Boolean = { true }
 
-    fun conductibleIf(func: (ContextProvider<C>) -> Boolean) =
-            copy(conductible = func)
+    fun name(name: () -> String) = apply { this.name = name() }
+    fun experiment(name: () -> String) = name(name)
 
-    internal fun complete() = DefaultExperiment(name, control!!, candidates, conductible)
+    fun control(name: String = "control", behaviour: Behaviour<T>) = apply {
+        control = Trial(name = name, behaviour = behaviour)
+    }
+
+    fun candidate(name: String = "candidate", behaviour: Behaviour<T>) = apply {
+        candidates += Trial(name = name, behaviour = behaviour)
+    }
+
+    fun conductibleIf(predicate: (C) -> Boolean) = apply {
+        conductible = predicate
+    }
+
+    internal fun complete() = DefaultExperiment(name, control, candidates, conductible)
 
 }
 
-data class ScientistSetup<T, C>(
-        private val contextProvider: ContextProvider<C>,
-        private val publish: Publisher<T, C> = NullPublisher(),
-        private val ignores: List<Matcher<T>> = emptyList(),
-        private val matcher: Matcher<T> = DefaultMatcher()
-) {
+class ScientistSetup<T, C> {
 
-    fun publisher(publisher: Publisher<T, C>) = copy(publish = publisher)
+    private var contextProvider: ContextProvider<C> by Delegates.notNull()
+    private var publish: Publisher<T, C> = NoPublisher()
+    private var ignores: List<Matcher<T>> = mutableListOf()
+    private var matcher: Matcher<T> = DefaultMatcher()
 
-    fun ignore(ignore: Matcher<T>) = copy(ignores = ignores + ignore)
+    fun publisher(publisher: Publisher<T, C>) = apply {
+        publish = publisher
+    }
 
-    fun match(matcher: Matcher<T>) = copy(matcher = matcher)
+    fun ignore(ignore: Matcher<T>) = apply {
+        this.ignores += ignore
+    }
+
+    fun match(matcher: Matcher<T>) = apply {
+        this.matcher = matcher
+    }
+
+    fun context(contextProvider: ContextProvider<C>) = apply {
+        this.contextProvider = contextProvider
+    }
 
     internal fun complete() = Scientist(contextProvider, publish, ignores, matcher)
 
 }
 
-data class ScienceSetup<T, C>(
-        private val contextProvider: ContextProvider<C>,
-        private val experimentName: String = "default-experiment",
-        private val scientist: Scientist<T, C>? = null,
-        private val experiment: Experiment<T, C>? = null
-) {
+infix fun <T, C> Scientist<T, C>.conduct(setup: ExperimentSetup<T, C>.() -> ExperimentSetup<T, C>): T =
+        this.evaluate(experiment(setup))
 
-    fun scientist(setup: ScientistSetup<T, C>.() -> ScientistSetup<T, C>) =
-            copy(scientist = scientist(contextProvider, setup = setup))
-    fun scientist(scientist: Scientist<T, C>) =
-            copy(scientist = scientist)
+infix fun <T, C> Scientist<T, C>.conduct(experiment: Experiment<T, C>): T = this.evaluate(experiment)
 
-    fun experiment(setup: ExperimentSetup<T, C>.() -> ExperimentSetup<T, C>) =
-            copy(experiment = experiment(experimentName, setup))
-    fun experiment(experiment: Experiment<T, C>) = copy(experiment = experiment)
+fun <T, C> experiment(setup: ExperimentSetup<T, C>.() -> ExperimentSetup<T, C>): Experiment<T, C>
+        = setup(ExperimentSetup()).complete()
 
-    internal fun complete() = scientist!!.evaluate(experiment!!)
-
-}
-
-fun <T, C> experiment(name: String, setup: ExperimentSetup<T, C>.() -> ExperimentSetup<T, C>): Experiment<T, C>
-        = setup(ExperimentSetup(name)).complete()
-
-fun <T, C> scientist(contextProvider: ContextProvider<C>, setup: ScientistSetup<T, C>.() -> ScientistSetup<T, C>): Scientist<T, C>
-        = setup(ScientistSetup(contextProvider)).complete()
-
-fun <T, C> science(name: String, contextProvider: ContextProvider<C>, setup: ScienceSetup<T, C>.() -> ScienceSetup<T, C>): T
-        = setup(ScienceSetup(contextProvider = contextProvider, experimentName = name)).complete()
-
-fun <T> science(name: String, setup: ScienceSetup<T, Unit>.() -> ScienceSetup<T, Unit>): T
-        = science(name, NoContextProvider, setup)
+fun <T, C> scientist(setup: ScientistSetup<T, C>.() -> ScientistSetup<T, C>): Scientist<T, C>
+        = setup(ScientistSetup()).complete()
