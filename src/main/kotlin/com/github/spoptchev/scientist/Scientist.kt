@@ -8,7 +8,7 @@ data class Scientist<T, C>(
 ) {
 
     fun evaluate(experiment: Experiment<T, C>): T {
-        val experimentState = experiment.conduct(contextProvider())
+        val experimentState = experiment.conduct(contextProvider)
 
         return when(experimentState) {
             is Skipped -> experimentState.observation.result

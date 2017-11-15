@@ -7,7 +7,6 @@ import kotlin.test.assertEquals
 class ScientistSetupTest {
 
     private val setup = ScientistSetup<Int, Unit>()
-            .context {}
 
     @Test
     fun `test change publisher`() {

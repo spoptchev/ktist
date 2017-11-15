@@ -21,7 +21,7 @@ class ExperimentTest {
     @Test
     fun `should return a skipped experiment state when not conductible`() {
         val experiment = baseExperiment.copy(conductible = { false })
-        val state = experiment.conduct(contextProvider())
+        val state = experiment.conduct(contextProvider)
 
         assertTrue(state is Skipped)
     }
@@ -29,7 +29,7 @@ class ExperimentTest {
     @Test
     fun `should return a conducted experiment when its conductible`() {
         val experiment = baseExperiment.copy(conductible = { true })
-        val state = experiment.conduct(contextProvider())
+        val state = experiment.conduct(contextProvider)
 
         assertTrue(state is Conducted)
     }

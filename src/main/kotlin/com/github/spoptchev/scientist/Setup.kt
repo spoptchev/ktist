@@ -7,7 +7,7 @@ class ExperimentSetup<T, C> {
     private var name: String = "default-experiment"
     private var control: Trial<T> by Delegates.notNull()
     private var candidates: List<Trial<T>> = mutableListOf()
-    private var conductible: (C) -> Boolean = { true }
+    private var conductible: (ContextProvider<C>) -> Boolean = { true }
 
     fun name(name: () -> String) = apply { this.name = name() }
     fun experiment(name: () -> String) = name(name)
@@ -20,7 +20,7 @@ class ExperimentSetup<T, C> {
         candidates += Trial(name = name, behaviour = behaviour)
     }
 
-    fun conductibleIf(predicate: (C) -> Boolean) = apply {
+    fun conductibleIf(predicate: (ContextProvider<C>) -> Boolean) = apply {
         conductible = predicate
     }
 
@@ -30,7 +30,7 @@ class ExperimentSetup<T, C> {
 
 class ScientistSetup<T, C> {
 
-    private var contextProvider: ContextProvider<C> by Delegates.notNull()
+    private var contextProvider: ContextProvider<C> = NotImplementedContextProvider()
     private var publish: Publisher<T, C> = NoPublisher()
     private var ignores: List<Matcher<T>> = mutableListOf()
     private var matcher: Matcher<T> = DefaultMatcher()
@@ -65,3 +65,6 @@ fun <T, C> experiment(setup: ExperimentSetup<T, C>.() -> ExperimentSetup<T, C>):
 
 fun <T, C> scientist(setup: ScientistSetup<T, C>.() -> ScientistSetup<T, C>): Scientist<T, C>
         = setup(ScientistSetup()).complete()
+
+fun <T, C> scientist(): Scientist<T, C>
+        = ScientistSetup<T, C>().complete()

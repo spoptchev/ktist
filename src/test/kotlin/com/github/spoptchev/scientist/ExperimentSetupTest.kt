@@ -34,7 +34,7 @@ class ExperimentSetupTest {
                 .conductibleIf { false }
                 .complete()
 
-        assertEquals(false, experiment.conductible(context()))
+        assertEquals(false, experiment.conductible(context))
     }
 
     @Test
