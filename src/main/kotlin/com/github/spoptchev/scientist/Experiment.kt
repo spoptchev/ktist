@@ -12,7 +12,7 @@ data class DefaultExperiment<T, in C>(
 ) : Experiment<T, C> {
 
     private val shuffledTrials: List<Trial<T>> by lazy {
-        (listOf(control) + candidates).sortedBy { it.id }
+        (candidates + control).sortedBy { it.id }
     }
 
     override fun conduct(context: C): ExperimentState<T> {
