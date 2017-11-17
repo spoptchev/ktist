@@ -1,3 +1,4 @@
+@file:JvmName("Setup")
 package com.github.spoptchev.scientist
 
 import kotlin.properties.Delegates

@@ -1,3 +1,4 @@
+@file:JvmName("TrialOutcome")
 package com.github.spoptchev.scientist
 
 sealed class Outcome<out T>

@@ -17,19 +17,19 @@ fun isAllowed(user): Boolean = scientist<Boolean, Unit>() conduct {
 }
 ```
 
-Wrap a `control` block around the code's original behavior, and wrap `candidate` around the new behavior. When conducting the experiment `conduct` will always return whatever the `control` block returns, but it does a bunch of stuff behind the scenes:
+Wrap a `control` lambda around the code's original behavior, and wrap `candidate` around the new behavior. When conducting the experiment `conduct` will always return whatever the `control` lambda returns, but it does a bunch of stuff behind the scenes:
 
-* It decides whether or not to run the `candidate` block,
+* It decides whether or not to run the `candidate` lambda,
 * Randomizes the order in which `control` and `candidate` blocks are run,
 * Measures the durations of all behaviors,
 * Compares the result of `candidate` to the result of `control`,
-* Swallows (but records) any exceptions raised in the `candidate` block, and
+* Swallows (but records) any exceptions raised in the `candidate` lambda, and
 * Publishes all this information.
 
 ## Scientist and Experiment
 
 Compared to other scientist libraries this library separates the concepts of a scientist and the experiment.
-Which in turn gives you more freedom and flexibility to compose and reuse scientists and experiments especially with dependency injection frameworks.
+Which in turn gives you more freedom and flexibility to compose and reuse scientists and experiments (especially with dependency injection frameworks).
 
 ```kotlin
 val scientist = scientist<Boolean, Unit>()
@@ -54,7 +54,7 @@ val scientist = scientist<Boolean, Unit> {
 }
 ```
 
-You can also extend the publisher `typealias` which then can be used as a parameter of the publisher block:
+You can also extend the publisher `typealias` which then can be used as a parameter of the publisher lambda:
 
 ```kotlin
 val logger = loggerFactory.call()
@@ -103,7 +103,7 @@ A `Success` outcome contains the value that has been evaluated. A `Failure` outc
 
 #### Adding context
 
-To provide additional data to the scientist `Result` and `Experiments` you can use the `context` block to add a context provider:
+To provide additional data to the scientist `Result` and `Experiments` you can use the `context` lambda to add a context provider:
 
 ```kotlin
 val scientist = scientist<Boolean, Map<String, Boolean>> {
@@ -111,11 +111,11 @@ val scientist = scientist<Boolean, Map<String, Boolean>> {
 }
 ```
 
-The context is evaluated lazily and is exposed to the publishable `Result` by evaluating `val context = result.contextProvider()` and in the experiments `conductibleIf` lambda that will be described a further down the page.
+The context is evaluated lazily and is exposed to the publishable `Result` by evaluating `val context = result.contextProvider()` and in the experiments `conductibleIf` lambda that will be described further down the page.
 
 #### Ignoring mismatches
 
-During the early stages of an experiment, it's possible that some of your code will always generate a mismatch for reasons you know and understand but haven't yet fixed. Instead of these known cases always showing up as mismatches in your metrics or analysis, you can tell the scientist whether or not to ignore a mismatch using the `ignore` block. You may include more than one block if needed:
+During the early stages of an experiment, it's possible that some of your code will always generate a mismatch for reasons you know and understand but haven't yet fixed. Instead of these known cases always showing up as mismatches in your metrics or analysis, you can tell the scientist whether or not to ignore a mismatch using the `ignore` lambda. You may include more than one lambda if needed:
 
 ```
 val scientist = scientist<Boolean, Map<String, Boolean>> {
@@ -138,3 +138,32 @@ val scientist = scientist<Boolean, Map<String, Boolean>> {
 
 ### Setting up an experiment
 
+With an experiment you are setting up the critical paths of your application that should be tested.
+
+#### Enabling/disabling experiments
+
+Sometimes you don't want an experiment to run. Say, disabling a new code path for anyone who isn't staff. You can disable an experiment by setting a `conductIf` lambda. If this returns `false`, the experiment will merely return the control value.
+
+```kotlin
+experiment<Int, Boolean> {
+}
+```
+
+### Java interop
+
+```java
+public boolean isAllowed(User user) {
+    Scientist<Boolean, String> scientist = Setup.scientist(setup -> setup
+            .context(() -> "execute")
+    );
+
+    Experiment<Boolean, String> experiment = Setup.experiment(setup -> setup
+            .name(() -> "experiment-name")
+            .control("test-control", () -> user.isAllowedOldWay())
+            .candidate("test-candidate", () -> user.isAllowedNewWay())
+            .conductibleIf((contextProvider) -> contextProvider.invoke().equals("execute"))
+    );
+
+    return scientist.evaluate(experiment);
+}
+```
