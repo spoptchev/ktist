@@ -182,6 +182,8 @@ experiment<Boolean, Unit> {
 }
 ```
 
+This tells the scientist to catch `NullPointerException` and throw any other exception when running the `control` and `candidate` lambdas.
+
 ### Complete DSL example
 
 You can compose and execute experiments by putting `conduct` between `scientist` and an experiment context:
