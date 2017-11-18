@@ -82,7 +82,7 @@ val scientist = scientist<Boolean, Unit> {
 }
 ```
 
-`candidate` and `control` are both of type `Outcome` (a sealed class) which either can be `Success` or `Failure`, so you can easily reason about them. As an example take a look at the default implementation:
+`candidate` and `control` are both of type `Outcome` (a sealed class) which either can be `Success` or `Failure`. As an example take a look at the default implementation:
 
 ```kotlin
 class DefaultMatcher<in T> : Matcher<T> {
@@ -139,17 +139,6 @@ val scientist = scientist<Boolean, Map<String, Boolean>> {
 
 Scientist will throw a `MismatchException` exception if any observations don't match.
 
-#### Putting it all together
-
-```kotlin
-val scientist = scientist<Boolean, Map<String, Boolean>> {
-    publisher { result -> logger.info(result) }
-    match { candidate, control -> candidate != control }
-    context { mapOf("yes" to true, "no" to false) }
-    ignore { candidate, control -> candidate.isFailure() }
-}
-```
-
 ### Setting up an experiment
 
 With an experiment you are setting up tests for the critical paths of your application by specifying a `control` and `candidate` lambda.
@@ -200,7 +189,7 @@ You can compose and execute experiments by putting `conduct` between `scientist`
 ```kotlin
 val result = scientist<Double, Unit> {
     publisher { result -> println(result) }
-} conduct {
+} conduct { // or conduct experiment {
     experiment { "experiment-dsl" }
     control { Math.random() }
     candidate { Math.random() }
