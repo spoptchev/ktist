@@ -193,6 +193,20 @@ experiment<Boolean, Unit> {
 }
 ```
 
+### Complete DSL example
+
+You can compose and execute experiments by putting `conduct` between `scientist` and an experiment context:
+
+```kotlin
+val result = scientist<Double, Unit> {
+    publisher { result -> println(result) }
+} conduct {
+    experiment { "experiment-dsl" }
+    control { Math.random() }
+    candidate { Math.random() }
+}
+```
+
 ### Java interop
 
 The Java interoperability can certainly be improved but should be sufficient for now:
