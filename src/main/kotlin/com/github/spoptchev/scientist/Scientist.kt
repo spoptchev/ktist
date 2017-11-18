@@ -4,7 +4,8 @@ data class Scientist<T, C>(
         val contextProvider: ContextProvider<C>,
         val publish: Publisher<T, C> = NoPublisher(),
         val ignores: List<Matcher<T>> = emptyList(),
-        val matcher: Matcher<T> = DefaultMatcher()
+        val matcher: Matcher<T> = DefaultMatcher(),
+        val throwOnMismatches: Boolean = false
 ) {
 
     fun evaluate(experiment: Experiment<T, C>): T {
@@ -30,6 +31,10 @@ data class Scientist<T, C>(
                 )
 
                 publish(result)
+
+                if (throwOnMismatches && result.mismatched) {
+                    throw MismatchException(experimentName)
+                }
 
                 controlObservation.result
             }

@@ -45,6 +45,7 @@ class ScientistSetup<T, C> {
     private var publish: Publisher<T, C> = NoPublisher()
     private var ignores: List<Matcher<T>> = mutableListOf()
     private var matcher: Matcher<T> = DefaultMatcher()
+    private var throwOnMismatches: Boolean = false
 
     fun publisher(publisher: Publisher<T, C>) = apply {
         publish = publisher
@@ -62,7 +63,17 @@ class ScientistSetup<T, C> {
         this.contextProvider = contextProvider
     }
 
-    internal fun complete() = Scientist(contextProvider, publish, ignores, matcher)
+    fun throwOnMismatches(throwOnMismatches: () -> Boolean) = apply {
+        this.throwOnMismatches = throwOnMismatches()
+    }
+
+    internal fun complete() = Scientist(
+            contextProvider = contextProvider,
+            publish = publish,
+            ignores = ignores,
+            matcher = matcher,
+            throwOnMismatches = throwOnMismatches
+    )
 
 }
 

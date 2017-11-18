@@ -4,6 +4,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 
 class ScientistTest {
@@ -14,7 +15,6 @@ class ScientistTest {
         }
     }
 
-    private val publisher = CatchingPublisher(null)
     private val contextProvider = NoContextProvider
     private val exception = RuntimeException("Test")
     private val controlTrial = Trial(name = "control-trial") { true }
@@ -31,13 +31,17 @@ class ScientistTest {
 
     private val scientist = Scientist(
             contextProvider = contextProvider,
-            publish = publisher,
             ignores = listOf(ignore)
     )
 
     @Test
     fun `test evaluate experiment`() {
-        val result = scientist.evaluate(baseExperiment)
+        val publisher = CatchingPublisher(null)
+
+        val result = scientist
+                .copy(publish = publisher)
+                .evaluate(baseExperiment)
+
         val publishedResult = publisher.caughtResult!!
 
         assertTrue(result)
@@ -52,6 +56,15 @@ class ScientistTest {
         assertTrue(publishedResult.mismatched)
         assertTrue(publishedResult.ignored)
         assertFalse(publishedResult.matched)
+    }
+
+    @Test(expected = MismatchException::class)
+    fun `test throw on mismatches`() {
+        scientist
+                .copy(throwOnMismatches = true)
+                .evaluate(baseExperiment)
+
+        fail("Expected to fail with MismatchException")
     }
 
 }

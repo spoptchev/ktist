@@ -23,7 +23,7 @@ Wrap a `control` lambda around the code's original behavior, and wrap `candidate
 * Randomizes the order in which `control` and `candidate` lambdas are run,
 * Measures the durations of all behaviors,
 * Compares the result of `candidate` to the result of `control`,
-* Swallows (but records) any exceptions raised in the `candidate` lambda, and
+* Swallows (but records) any exceptions thrown in the `candidate` lambda, and
 * Publishes all this information.
 
 ## Scientist and Experiment
@@ -117,13 +117,27 @@ The context is evaluated lazily and is exposed to the publishable `Result` by ev
 
 During the early stages of an experiment, it's possible that some of your code will always generate a mismatch for reasons you know and understand but haven't yet fixed. Instead of these known cases always showing up as mismatches in your metrics or analysis, you can tell the scientist whether or not to ignore a mismatch using the `ignore` lambda. You may include more than one lambda if needed:
 
-```
+```kotlin
 val scientist = scientist<Boolean, Map<String, Boolean>> {
     ignore { candidate, control -> candidate.isFailure() }
 }
 ```
 
 Like in `match` candidate and control are of type `Outcome`.
+
+#### Testing
+
+When running your test suite, it's helpful to know that the experimental results always match. To help with testing, Scientist defines a `throwOnMismatches` field. Only do this in your test suite!
+
+To throw on mismatches:
+
+```kotlin
+val scientist = scientist<Boolean, Map<String, Boolean>> {
+    throwOnMismatches { true }
+}
+```
+
+Scientist will throw a `MismatchException` exception if any observations don't match.
 
 #### Putting it all together
 
@@ -180,6 +194,8 @@ experiment<Boolean, Unit> {
 ```
 
 ### Java interop
+
+The Java interoperability can certainly be improved but should be sufficient for now:
 
 ```java
 public boolean isAllowed(User user) {

@@ -2,6 +2,8 @@ package com.github.spoptchev.scientist
 
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 
 class ScientistSetupTest {
@@ -47,6 +49,22 @@ class ScientistSetupTest {
                 .complete()
 
         assertEquals(NoContextProvider, scientist.contextProvider)
+    }
+
+    @Test
+    fun `test throw on mismatches not set`() {
+        val scientist = setup.complete()
+
+        assertFalse(scientist.throwOnMismatches)
+    }
+
+    @Test
+    fun `test throw on mismatches`() {
+        val scientist = setup
+                .throwOnMismatches { true }
+                .complete()
+
+        assertTrue(scientist.throwOnMismatches)
     }
 
 }
