@@ -227,13 +227,13 @@ Maven:
 <dependency>
   <groupId>com.github.spoptchev</groupId>
   <artifactId>scientist</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
 Gradle:
 
 ```
-compile 'com.github.spoptchev:scientist:1.0.0'
+compile 'com.github.spoptchev:scientist:1.0.1'
 ```
 
