@@ -88,7 +88,7 @@ val scientist = scientist<Boolean, Unit> {
 class DefaultMatcher<in T> : Matcher<T> {
     override fun invoke(candidate: Outcome<T>, control: Outcome<T>): Boolean = when(candidate) {
         is Success -> when(control) {
-            is Success -> candidate == control
+            is Success -> candidate.value == control.value
             is Failure -> false
         }
         is Failure -> when(control) {
