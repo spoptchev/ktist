@@ -168,6 +168,17 @@ experiment<Boolean, Map<String, Boolean>> {
 }
 ```
 
+#### Handling errors
+
+Scientist catches and tracks _all_ exceptions thrown in a `control` or `candidate` lambda. To catch a more restrictive set of exceptions add a `catch` lambda to your experiment setup:
+
+```kotlin
+experiment<Boolean, Unit> {
+    // ...
+    catch { e -> e is NullPointerException }
+}
+```
+
 ### Java interop
 
 ```java

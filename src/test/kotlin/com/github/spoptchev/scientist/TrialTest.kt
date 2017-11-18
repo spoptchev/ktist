@@ -4,6 +4,7 @@ import org.junit.Test
 import java.time.Duration
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 
 class TrialTest {
@@ -14,7 +15,7 @@ class TrialTest {
     }
 
     private val exceptionTrial = Trial("test", "test") {
-        throw RuntimeException("e")
+        throw NumberFormatException("e")
     }
 
     @Test
@@ -38,6 +39,15 @@ class TrialTest {
         val observation = exceptionTrial.run()
 
         assertTrue(observation.outcome.isFailure())
+    }
+
+    @Test(expected = NumberFormatException::class)
+    fun `test throw exception when not caught`() {
+        val trial = exceptionTrial.copy(catches = { e -> e is NullPointerException })
+
+        trial.run()
+
+        fail("expected to throw NumberFormatException")
     }
 
 }

@@ -9,6 +9,7 @@ class ExperimentSetup<T, C> {
     private var control: Trial<T> by Delegates.notNull()
     private var candidates: List<Trial<T>> = mutableListOf()
     private var conductible: (ContextProvider<C>) -> Boolean = { true }
+    private var catches: (Throwable) -> Boolean = { true }
 
     fun name(name: () -> String) = apply { this.name = name() }
     fun experiment(name: () -> String) = name(name)
@@ -25,7 +26,16 @@ class ExperimentSetup<T, C> {
         conductible = predicate
     }
 
-    internal fun complete() = DefaultExperiment(name, control, candidates, conductible)
+    fun catch(catcher: (Throwable) -> Boolean) = apply {
+        catches = catcher
+    }
+
+    internal fun complete() = DefaultExperiment(
+            name = name,
+            control = control.copy(catches = catches),
+            candidates = candidates.map { it.copy(catches = catches) },
+            conductible = conductible
+    )
 
 }
 

@@ -18,7 +18,7 @@ data class Observation<T>(
     val result: T by lazy {
         when(outcome) {
             is Success<T> -> outcome.value
-            is Failure<T> -> throw outcome.exception
+            is Failure<T> -> throw outcome.throwable
         }
     }
 

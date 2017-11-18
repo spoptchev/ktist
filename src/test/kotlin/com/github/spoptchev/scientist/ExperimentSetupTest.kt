@@ -2,6 +2,8 @@ package com.github.spoptchev.scientist
 
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ExperimentSetupTest {
 
@@ -43,7 +45,24 @@ class ExperimentSetupTest {
                 .experiment { "some-experiment" }
                 .complete()
 
-        assertEquals(experiment.name, "some-experiment")
+        assertEquals("some-experiment", experiment.name)
+    }
+
+    @Test
+    fun `test catch`() {
+        val experiment = setup
+                .control { 1 }
+                .candidate { 1 }
+                .catch { e: Throwable -> e is NumberFormatException }
+                .complete()
+
+        val e1 = NumberFormatException("")
+        val e2 = NullPointerException("")
+
+        assertTrue(experiment.control.catches(e1))
+        assertTrue(experiment.candidates.all { it.catches(e1) })
+        assertFalse(experiment.control.catches(e2))
+        assertFalse(experiment.candidates.all { it.catches(e2) })
     }
 
 }
