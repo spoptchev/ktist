@@ -11,7 +11,7 @@ data class Trial<T>(
         val name: String,
         val catches: (Throwable) -> Boolean = { true },
         val behaviour: Behaviour<T>
-) {
+): Comparable<Trial<T>> {
 
     fun run(clock: Clock = NanoClock()): Observation<T> {
         val start = Instant.now(clock)
@@ -26,5 +26,9 @@ data class Trial<T>(
 
         return Observation(id, name, outcome, start, stop)
     }
+
+    fun refresh() = copy(id = UUID.randomUUID().toString())
+
+    override fun compareTo(other: Trial<T>): Int = id.compareTo(other.id)
 
 }

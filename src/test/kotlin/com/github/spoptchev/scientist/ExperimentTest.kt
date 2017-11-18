@@ -1,6 +1,7 @@
 package com.github.spoptchev.scientist
 
 import org.junit.Test
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 
@@ -32,6 +33,20 @@ class ExperimentTest {
         val state = experiment.conduct(contextProvider)
 
         assertTrue(state is Conducted)
+    }
+
+    @Test
+    fun `refresh should update the ids of the control and candidate trials`() {
+        val controlId = baseExperiment.control.id
+        val candidateIds = baseExperiment.candidates.map { it.id }
+
+        val refreshedExperiment = baseExperiment.refresh() as DefaultExperiment
+
+        val newControlId = refreshedExperiment.control.id
+        val newCandidateIds = refreshedExperiment.candidates.map { it.id }
+
+        assertNotEquals(controlId, newControlId)
+        assertNotEquals(candidateIds, newCandidateIds)
     }
 
 }

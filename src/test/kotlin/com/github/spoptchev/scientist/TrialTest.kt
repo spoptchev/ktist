@@ -3,6 +3,7 @@ package com.github.spoptchev.scientist
 import org.junit.Test
 import java.time.Duration
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -48,6 +49,24 @@ class TrialTest {
         trial.run()
 
         fail("expected to throw NumberFormatException")
+    }
+
+    @Test
+    fun `test refresh to generate a new id`() {
+        val currentId = trial.id
+        val newId = trial.refresh().id
+
+        assertNotEquals(currentId, newId)
+    }
+
+    @Test
+    fun `test compareTo`() {
+        val trial1 = Trial(id = "Z", name = "test") { }
+        val trial2 = Trial(id = "A", name = "test") { }
+        val trial3 = Trial(id = "A", name = "test") { }
+
+        assertTrue(trial1 > trial2)
+        assertTrue(trial2 >= trial3)
     }
 
 }

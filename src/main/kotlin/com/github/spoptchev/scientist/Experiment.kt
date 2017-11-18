@@ -2,6 +2,7 @@ package com.github.spoptchev.scientist
 
 interface Experiment<T, in C> {
     fun conduct(contextProvider: ContextProvider<C>): ExperimentState<T>
+    fun refresh(): Experiment<T, C>
 }
 
 data class DefaultExperiment<T, in C>(
@@ -12,7 +13,7 @@ data class DefaultExperiment<T, in C>(
 ) : Experiment<T, C> {
 
     private val shuffledTrials: List<Trial<T>> by lazy {
-        (candidates + control).sortedBy { it.id }
+        (candidates + control).sorted()
     }
 
     override fun conduct(contextProvider: ContextProvider<C>): ExperimentState<T> {
@@ -26,5 +27,10 @@ data class DefaultExperiment<T, in C>(
             Skipped(control.run())
         }
     }
+
+    override fun refresh(): Experiment<T, C> = copy(
+            control = control.refresh(),
+            candidates = candidates.map { it.refresh() }
+    )
 
 }
