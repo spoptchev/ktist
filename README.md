@@ -10,7 +10,7 @@ Let's pretend you're changing the way you handle permissions in a large web app.
 
 
 ```kotlin
-fun isAllowed(user): Boolean = scientist<Boolean, Unit>() conduct {
+fun isAllowed(user: User): Boolean = scientist<Boolean, Unit>() conduct {
     experiment { "widget-permissions" }
     control { user.isAllowedOldWay() }
     candidate { user.isAllowedNewWay() }
@@ -20,7 +20,7 @@ fun isAllowed(user): Boolean = scientist<Boolean, Unit>() conduct {
 Wrap a `control` lambda around the code's original behavior, and wrap `candidate` around the new behavior. When conducting the experiment `conduct` will always return whatever the `control` lambda returns, but it does a bunch of stuff behind the scenes:
 
 * It decides whether or not to run the `candidate` lambda,
-* Randomizes the order in which `control` and `candidate` blocks are run,
+* Randomizes the order in which `control` and `candidate` lambdas are run,
 * Measures the durations of all behaviors,
 * Compares the result of `candidate` to the result of `control`,
 * Swallows (but records) any exceptions raised in the `candidate` lambda, and
@@ -46,7 +46,7 @@ The scientist is responsible for setting up the environment of an experiment and
 
 #### Publishing results
 
-The examples above will run, but they're not really *doing* anything. The `candidate` blocks run every time and none of the results get published. Add a publisher to control the result reporting:
+The examples above will run, but they're not really *doing* anything. The `candidate` lambdas run every time and none of the results get published. Add a publisher to control the result reporting:
 
 ```kotlin
 val scientist = scientist<Boolean, Unit> {
@@ -138,14 +138,33 @@ val scientist = scientist<Boolean, Map<String, Boolean>> {
 
 ### Setting up an experiment
 
-With an experiment you are setting up the critical paths of your application that should be tested.
+With an experiment you are setting up tests for the critical paths of your application by specifying a `control` and `candidate` lambda.
+
+```kotlin
+fun experiment = experiment<Boolean, Unit> {
+    name { "widget-permissions" }
+    control { user.isAllowedOldWay() }
+    candidate { user.isAllowedNewWay() }
+}
+```
 
 #### Enabling/disabling experiments
 
-Sometimes you don't want an experiment to run. Say, disabling a new code path for anyone who isn't staff. You can disable an experiment by setting a `conductIf` lambda. If this returns `false`, the experiment will merely return the control value.
+Sometimes you don't want an experiment to run. Say, disabling a new code path for anyone who isn't member. You can disable an experiment by setting a `conductibleIf` lambda. If this returns `false`, the experiment will merely return the control value.
 
 ```kotlin
-experiment<Int, Boolean> {
+experiment<Boolean, Unit> {
+    // ...
+    conductibleIf { user.isMember() }
+}
+```
+
+The `conductibleIf` lambda can also take a `contextProvider` as a parameter:
+
+```kotlin
+experiment<Boolean, Map<String, Boolean>> {
+    // ...
+    conductibleIf { context -> context()["externalCondition"]!! }
 }
 ```
 
