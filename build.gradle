@@ -1,6 +1,3 @@
-group 'com.github.spoptchev'
-version '0.1-SNAPSHOT'
-
 buildscript {
     ext.kotlin_version = '1.1.51'
 
@@ -11,6 +8,12 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
+
+plugins {
+    id 'net.researchgate.release' version '2.6.0' apply false
+}
+
+group 'com.github.spoptchev'
 
 apply plugin: 'kotlin'
 
@@ -25,9 +28,90 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 }
 
+if (project.hasProperty("release")) {
+    apply plugin: 'net.researchgate.release'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    release {
+        failOnUpdateNeeded = false
+    }
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+
+    signing {
+        sign configurations.archives
+    }
+
+    build {
+        afterReleaseBuild.dependsOn uploadArchives
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: System.getenv('OSSRH_USERNAME'), password: System.getenv('OSSRH_PASSWORD'))
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: System.getenv('OSSRH_USERNAME'), password: System.getenv('OSSRH_PASSWORD'))
+                }
+
+                pom.project {
+                    name 'Scientist'
+                    packaging 'jar'
+                    description 'Scientist'
+                    url 'http://www.github.com/spoptchev/scientist'
+
+                    scm {
+                        connection 'scm:git:http://www.github.com/spoptchev/scientist'
+                        developerConnection 'scm:git:http://github.com/spoptchev'
+                        url 'http://www.github.com/spoptchev/scientist'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The MIT License'
+                            url 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'spoptchev'
+                            name 'Spas Poptchev'
+                            email 'spas.poptchev@gmail.com'
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+wrapper {
+    gradleVersion "4.2"
 }

@@ -216,3 +216,22 @@ public boolean isAllowed(User user) {
     return scientist.evaluate(experiment);
 }
 ```
+
+### Installation
+
+Maven:
+
+```
+<dependency>
+  <groupId>com.github.spoptchev</groupId>
+  <artifactId>scientist</artifactId>
+  <version>1.0.0</version>
+</dependency>
+```
+
+Gradle:
+
+```
+compile 'com.github.spoptchev:scientist:1.0.0'
+```
+
