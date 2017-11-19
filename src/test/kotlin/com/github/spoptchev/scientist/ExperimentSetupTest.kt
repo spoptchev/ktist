@@ -53,7 +53,7 @@ class ExperimentSetupTest {
         val experiment = setup
                 .control { 1 }
                 .candidate { 1 }
-                .catch { e: Throwable -> e is NumberFormatException }
+                .catches { e: Throwable -> e is NumberFormatException }
                 .complete()
 
         val e1 = NumberFormatException("")

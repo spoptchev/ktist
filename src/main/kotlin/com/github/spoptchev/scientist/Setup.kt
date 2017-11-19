@@ -26,7 +26,7 @@ class ExperimentSetup<T, C> {
         conductible = predicate
     }
 
-    fun catch(catcher: (Throwable) -> Boolean) = apply {
+    fun catches(catcher: (Throwable) -> Boolean) = apply {
         catches = catcher
     }
 

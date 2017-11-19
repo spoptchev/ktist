@@ -173,12 +173,12 @@ experiment<Boolean, Map<String, Boolean>> {
 
 #### Handling errors
 
-Scientist catches and tracks _all_ exceptions thrown in a `control` or `candidate` lambda. To catch a more restrictive set of exceptions add a `catch` lambda to your experiment setup:
+Scientist catches and tracks _all_ exceptions thrown in a `control` or `candidate` lambda. To catch a more restrictive set of exceptions add a `catches` lambda to your experiment setup:
 
 ```kotlin
 experiment<Boolean, Unit> {
     // ...
-    catch { e -> e is NullPointerException }
+    catches { e -> e is NullPointerException }
 }
 ```
 
@@ -227,13 +227,13 @@ Maven:
 <dependency>
   <groupId>com.github.spoptchev</groupId>
   <artifactId>scientist</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
 Gradle:
 
 ```
-compile 'com.github.spoptchev:scientist:1.0.1'
+compile 'com.github.spoptchev:scientist:1.0.2'
 ```
 
