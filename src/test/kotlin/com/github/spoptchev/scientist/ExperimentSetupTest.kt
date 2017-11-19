@@ -49,7 +49,7 @@ class ExperimentSetupTest {
     }
 
     @Test
-    fun `test catch`() {
+    fun `test catches`() {
         val experiment = setup
                 .control { 1 }
                 .candidate { 1 }

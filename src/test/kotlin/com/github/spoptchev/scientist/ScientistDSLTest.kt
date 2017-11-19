@@ -31,4 +31,15 @@ class ScientistDSLTest {
 
     }
 
+    @Test
+    fun `test with experiment`() {
+        val result = scientist<Int, Unit>() conduct experiment {
+            name { "experiment-dsl" }
+            control("control") { 1 }
+            candidate("candidate") { 1 }
+        }
+
+        assertEquals(1, result)
+    }
+
 }
