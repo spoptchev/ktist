@@ -2,7 +2,7 @@
 
 A kotlin library for carefully refactoring critical paths in your application.
 
-This libraries API and README is inspired by the ruby gem [scientist](https://github.com/github/scientist).
+This library is inspired by the ruby gem [scientist](https://github.com/github/scientist).
 
 ## How do I science?
 
