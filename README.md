@@ -33,7 +33,7 @@ Which in turn gives you more freedom and flexibility to compose and reuse scient
 
 ```kotlin
 val scientist = scientist<Boolean, Unit>()
-val experiment = experiment<Boolean, Unit() {
+val experiment = experiment<Boolean, Unit>() {
     control { true }
 }
 
